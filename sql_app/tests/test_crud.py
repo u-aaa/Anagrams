@@ -19,6 +19,14 @@ def test_add_words():
     assert results == [('camps', 'acmps', 5, False), ('Egyptians', 'aeginpsty', 9, True), ('stats', 'asstt', 5, False)]
 
 
+def test_add_words_negative():
+    add_words: bool = anagram.add_words(words=['red camps', 'houses'], db=db)
+    assert add_words == False
+    query: str = "SELECT * from dictionary where word in ('red camps', 'houses')"
+    results: list = db.execute(query).fetchall()
+    assert results == []
+
+
 def test_get_dictionary_stats():
     stats: dict = anagram.get_dictionary_stats(db)
     word_count = len(db.query(Dictionary.word).all())

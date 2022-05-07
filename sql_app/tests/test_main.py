@@ -66,6 +66,12 @@ def test_add_words():
     assert response.json() == None
 
 
+def test_add_words_negative():
+    response = client.post('/words.json', json={"words": ['red camps', 'houses']})
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Cannot add phrase to dictionary"}
+
+
 def test_check_anagrams_positive():
     response = client.post('/anagrams', json={"words": ["astilbe", "astilbe", "bestial", "blastie"]})
     assert response.status_code == 200
