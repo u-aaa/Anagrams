@@ -18,13 +18,16 @@ The API responds on the following endpoints as specified.
 - `GET /anagrams`:  
   - Returns the words with the most anagrams.
   - This endpoint supports an optional parameter `size`. When passed, it returns words with anagrams of passed size.
-  - This endpoint also supports an additional query params that indicates whether to include proper nouns in the 
+  - This endpoint also supports an additional query params that indicates whether to include proper nouns in the and 
+  the maximum number of results to return, the default limit is 5. 
   list of anagrams and that indicates the maximum number of results to return
 - `DELETE /words/{word}.json`: Deletes a single word from the data store.
 - `DELETE /words.json`: Deletes all contents of the data store.
 - `DELETE /anagrams/{word}.json`: Deletes a word and all of its anagrams
 
-Example (assuming the API is being served on localhost port 8000):
+## Usage
+Assuming the API is being served on localhost port 8000
+  - For additional documentation on the apis check - `http://127.0.0.1:8000/docs`
 
 ```{bash}
 # Adding words to the corpus
@@ -32,14 +35,23 @@ $ curl -i -X POST -d '{ "words": ["read", "dear", "dare"] }' http://localhost:80
 HTTP/1.1 201 Created
 ...
 
+```{bash}
+# ceck if certain words are anagrams
+$ curl -i -X POST -d '{ "words": ["read", "dear", "dare"] }' http://localhost:8000/anagrams
+HTTP/1.1 200 OK
+...
+true
+
 # Fetching anagrams
 $ curl -i http://localhost:8000/anagrams/read.json
 HTTP/1.1 200 OK
 ...
 {
   anagrams: [
-    "dear",
-    "dare"
+    "ared",
+    "daer",
+    "dare",
+    "dear"
   ]
 }
 
@@ -49,20 +61,40 @@ HTTP/1.1 200 OK
 ...
 {
   anagrams: [
-    "dare"
+    "ared"
   ]
 }
+
+# Fetching words with the anagrams of size 5
+$ curl -i http://localhost:8000/anagrams?size=5&limit=1
+HTTP/1.1 200 OK
+...
+[
+  {"anagrams":
+    ["Astilbe","astilbe","bestial","blastie","stabile"]
+  }
+]
 
 # Delete single word
 $ curl -i -X DELETE http://localhost:8000/words/read.json
 HTTP/1.1 204 No Content
 ...
 
+# Delete word with anagrams
+$ curl -i -X DELETE http://localhost:8000/anagrams/read.json
+HTTP/1.1 204 No Content
+...
+
+
 # Delete all words
 $ curl -i -X DELETE http://localhost:8000/words.json
 HTTP/1.1 204 No Content
 ...
 ```
+
+## Implementation details
+This project was developed using FastApi and PostgresDB.
+
 
 Note that a word is not considered to be its own anagram.
 
