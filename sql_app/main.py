@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, Depends
+from fastapi import FastAPI, status, Depends, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from sql_app.database import get_db
@@ -59,7 +59,9 @@ def add_words(word_list: Words, db: Session = Depends(get_db)):
     :return: None
     '''
     if word_list.words:
-        anagram.add_words(word_list.words, db)
+        add_words = anagram.add_words(word_list.words, db)
+        if add_words is False:
+            raise HTTPException(status_code=400, detail="Cannot add phrase to dictionary")
     return None
 
 

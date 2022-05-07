@@ -37,13 +37,18 @@ class Anagrams:
                     db.commit()
             db.commit()
 
-    def add_words(self, words: list, db: Session):
+    def add_words(self, words: list, db: Session) -> Optional[str]:
         for word in words:
-            check_word: Optional[Dictionary] = db.query(Dictionary).filter_by(word=word, word_len=len(word)).first()
-            if check_word is None:
-                db_item: Dictionary = Dictionary(word=word, sorted_letters=get_sorted(word), word_len=len(word),
-                                                 is_noun=check_is_noun(word))
-                db.add(db_item)
+            single_word: int = len(word.split(' '))
+            if single_word == 1:
+                check_word: Optional[Dictionary] = db.query(Dictionary).filter_by(word=word, word_len=len(word)).first()
+                if check_word is None:
+                    db_item: Dictionary = Dictionary(word=word, sorted_letters=get_sorted(word), word_len=len(word),
+                                                     is_noun=check_is_noun(word))
+                    db.add(db_item)
+            else:
+                db.rollback()
+                return False
         db.commit()
         return True
 
