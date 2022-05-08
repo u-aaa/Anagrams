@@ -93,8 +93,13 @@ HTTP/1.1 204 No Content
 ```
 
 ## Implementation details
-This project was developed using FastApi and PostgresDB.
+This project was written in Python3 using FastApi framework. The data is stored in PostgresDB.
 
+## Additional Features
+Some additional features I think can be implemented in the program.
+- Check if a word exists in the dictionary.
+- Get anagrams for phrases and sentences.
+- Get words with most anagrams by length of words.
 
 Note that a word is not considered to be its own anagram.
 
