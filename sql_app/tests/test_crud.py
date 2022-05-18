@@ -98,3 +98,9 @@ def test_delete_all():
     anagram.delete_all(db=db)
     result: Optional[Dictionary] = len(db.query(Dictionary).all())
     assert result == 0
+
+
+def test_load_db():
+    anagram.load_dictionary_table(db=db)
+    result: Optional[Dictionary] = len(db.query(Dictionary).all())
+    assert result == 235886
