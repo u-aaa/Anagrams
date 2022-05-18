@@ -8,20 +8,25 @@ from collections.abc import Iterable
 def get_sorted(word: str):
     return ''.join(sorted(word.lower()))
 
+
 def check_is_noun(word: str):
     return True if word[0].isupper() else False
 
 
-def create_tables(db: Session):
-    Base.metadata.create_all(bind=db)
-    return None
+def check_db_for_data(db: Session) -> bool:
+    data = db.query(Dictionary).all()
+    if data:
+        return True
+    return False
 
 
 class Anagrams:
     def create_table(self, db: Session):
-        Base.metadata.create_all(bind=db)
+        Base.metadata.create_all(bind=db.bind)
 
     def load_dictionary_table(self, db: Session):
+        if check_db_for_data(db):
+            return None
         with open('./dictionary/dictionary.txt', 'r') as f:
             counter: int = 0
             for line in f:
@@ -36,8 +41,9 @@ class Anagrams:
                 if counter % 100 == 0:
                     db.commit()
             db.commit()
+        return None
 
-    def add_words(self, words: list, db: Session) -> Optional[str]:
+    def add_words(self, words: list, db: Session) -> bool:
         for word in words:
             single_word: int = len(word.split(' '))
             if single_word == 1:
@@ -63,8 +69,8 @@ class Anagrams:
 
     def get_anagrams(self, word: str, db: Session, limit: Optional[int] = None, noun: bool = True):
         if noun:
-            fetch_anagrams: Dictionary = db.query(Dictionary).filter_by(sorted_letters=get_sorted(word),
-                                                                        word_len=len(word))
+            fetch_anagrams: Iterable = db.query(Dictionary).filter_by(sorted_letters=get_sorted(word),
+                                                                      word_len=len(word))
         else:
             fetch_anagrams = db.query(Dictionary).filter_by(sorted_letters=get_sorted(word), word_len=len(word),
                                                             is_noun=noun)
@@ -84,9 +90,9 @@ class Anagrams:
                          f'ORDER BY count(*) DESC LIMIT {limit}'
         else:
             query = 'SELECT sorted_letters, count(*) FROM public.dictionary  ' \
-                         'WHERE word_len > 2 and is_noun = False GROUP BY sorted_letters ' \
-                         'HAVING count(*) > 1 ' \
-                         f'ORDER BY count(*) DESC LIMIT {limit}'
+                    'WHERE word_len > 2 and is_noun = False GROUP BY sorted_letters ' \
+                    'HAVING count(*) > 1 ' \
+                    f'ORDER BY count(*) DESC LIMIT {limit}'
         max_sorted: Iterable = db.execute(query)
 
         return [{'anagrams': self.get_anagrams(word=word[0], db=db, noun=noun), 'len': word[1]}
@@ -107,13 +113,11 @@ class Anagrams:
         return [{'anagrams': self.get_anagrams(word[0], db)} for word in fixed_size]
 
     def check_anagrams(self, words: list):
+        first = get_sorted(words[0])
         for word in words:
-            first = get_sorted(words[0])
-            for word in words:
-                if first != get_sorted(word):
-                    return False
-                    break
-            return True
+            if first != get_sorted(word):
+                return False
+        return True
 
     def delete_word_and_anagrams(self, word: str, db: Session):
         db.query(Dictionary).filter_by(sorted_letters=get_sorted(word), word_len=len(word)).delete()
