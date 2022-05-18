@@ -92,6 +92,36 @@ HTTP/1.1 204 No Content
 ...
 ```
 
+## Installation
+To run the app:
+- Install dependencies
+```
+pip install -r requirements.txt
+```
+- Using postgres, create database for the project
+- Create config.py file in the root folder and input database details
+```
+db_credentials = {
+    'host': 'localhost',
+    'port': 5432,
+    'user': 'thisuser',
+    'password': 'fake_password',
+    'database': 'anagram_db'
+}
+```
+- Create tables in database & load dictionary - run scripts/create_table.py
+```
+python scripts/create_table.py
+```
+- Run FastApi Application
+```
+uvicorn sql_app.main:app --reload
+```
+- Run tests
+```
+pytest sql_app/tests
+```
+
 ## Implementation details
 This project was written in Python3 using FastApi framework. The data is stored in PostgresDB.
 
